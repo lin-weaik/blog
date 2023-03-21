@@ -2,10 +2,13 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
+import { useQuery } from '../../convex/_generated/react'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+  const tasks = useQuery("getTasks");
+  console.log(tasks)
   return (
     <>
       <Head>
