@@ -5,10 +5,9 @@ import { Box, Button, Container, CSSReset, Divider, Flex, IconButton, Stack, sty
 import { marked } from "marked"
 import Image from "next/image"
 import { useRouter } from "next/router"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useMutation, useQuery } from "../../convex/_generated/react"
 
-const markdownStyle = '<link rel="stylesheet" href="/github-markdown.min.css" />'
 
 function getQueryString(path: string, name: string) {
   var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
@@ -20,6 +19,7 @@ function getQueryString(path: string, name: string) {
 }
 
 function Resume() {
+  const ref = useRef<HTMLIFrameElement>(null)
   const router = useRouter()
   const [id, setId] = useState(getQueryString(router.asPath, 'id') || NEXT_PUBLIC_RESUME_ID)
   const [value, setValue] = useState('')
@@ -32,7 +32,7 @@ function Resume() {
     setValue(e.target.value)
   }
   const valueHtml = useMemo(() => {
-    return `<div class="markdown-body">${marked.parse(value)}</div>` + markdownStyle
+    return `<div class="markdown-body">${marked.parse(value)}</div>`
   }, [value])
 
   useEffect(() => {
@@ -40,6 +40,13 @@ function Resume() {
       setValue(resume.context)
     }
   }, [resume])
+
+  useEffect(() => {
+    if (ref.current?.contentDocument?.querySelector('.markdown-body')) {
+      const markdown = ref.current?.contentDocument?.querySelector('.markdown-body') as Element
+      markdown.innerHTML = valueHtml
+    }
+  }, [valueHtml])
 
   const handleClick = async () => {
     if (!edit) {
@@ -95,7 +102,14 @@ function Resume() {
         </Box>
         <Divider orientation='vertical' transition="all ease 600ms" opacity={edit ? 1 : 0} />
         <Box width={edit ? '50%' : '100%'} transition="width ease 600ms">
-          <iframe srcDoc={valueHtml} width="100%" style={{ height: '100%' }} />
+          <iframe 
+            ref={ref}
+            src="/preview.html" 
+            width="100%" 
+            style={{ height: '100%' }} 
+            frameBorder="0" 
+            sandbox="allow-same-origin allow-top-navigation-by-user-activation"
+             />
         </Box>
       </Flex>
     </Box>
