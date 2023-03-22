@@ -8,6 +8,8 @@ import { useRouter } from "next/router"
 import { useEffect, useMemo, useState } from "react"
 import { useMutation, useQuery } from "../../convex/_generated/react"
 
+const markdownStyle = '<link rel="stylesheet" href="/github-markdown.min.css" />'
+
 function getQueryString(path: string, name: string) {
   var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
   var r = path.split('?')?.[1]?.match(reg);
@@ -30,7 +32,7 @@ function Resume() {
     setValue(e.target.value)
   }
   const valueHtml = useMemo(() => {
-    return marked.parse(value)
+    return `<div class="markdown-body">${marked.parse(value)}</div>` + markdownStyle
   }, [value])
 
   useEffect(() => {
